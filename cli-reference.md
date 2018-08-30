@@ -2,7 +2,7 @@
 
 copyright:
   years: 2017, 2018
-lastupdated: "2018-07-19"
+lastupdated: "2018-08-30"
 
 ---
 
@@ -22,6 +22,8 @@ This document is organized into three sections:
 * [Network CLI commands](#network)
 * [Compute CLI commands](#compute)
 * [Regions and Zones CLI commands](#geography)
+* [VPN CLI commands](#VPN)
+* [Load Balancers CLI commands](#Load-Balancers)
 
 You can scroll through the Table of Contents menu at the right side of your screen to view the functional groupings of commands, such as those related to subnets, Floating IPs, and so forth.
 
@@ -49,17 +51,17 @@ You can scroll through the Table of Contents menu at the right side of your scre
   ```
   {: codeblock}
 
-3. Log in to IBM Cloud.
+3. Log in to IBM Cloud. infrastructure-service plugin use the region that `ibmcloud login` target to determine what VPC endpoint will be used. For example, if you want to access VPC endpoint `us-south.iaas.cloud.ibm.com`, you have to use `ibmcloud login -a api.ng.bluemix.net` to target us-south region.
 
   If you have a federated account:
   ```
-  ibmcloud login -sso
+  ibmcloud login -a api.ng.bluemix.net -sso
   ```
   {: codeblock}
 
   otherwise
   ```
-  ibmcloud login
+  ibmcloud login -a api.ng.bluemix.net
   ```
   {: codeblock}
 
@@ -111,8 +113,8 @@ Reserve a floating IP in current resource group
 **Options**
 
 - `FLOATING_IP_NAME`: Name of the floating IP
-- `--zone `: Name of the target zone. This is exclusive with `--nic`
-- `--nic`: ID of the target network interface. This is exclusive with `--zone`
+- `--zone`: Name of the target zone. This is exclusive with `--nic`
+- `--nic-id`: ID of the target network interface. This is exclusive with `--zone`
 - `--json`: Format output in JSON
 
 ---
@@ -138,13 +140,14 @@ Update a floating IP
 
 **Syntax**
 
-`ibmcloud is floating-ip-update  FLOATING_IP_ID [--name NEW_NAME] [--nic-id NIC_ID]`
+`ibmcloud is floating-ip-update  FLOATING_IP_ID [--name NEW_NAME] [--nic-id NIC_ID] [--json]`
 
 **Options**
 
 - `FLOATING_IP_ID `: ID of the floating IP
 - `--name`: New name of the floating IP
-- `--nic`: ID of the new network interface to associate with
+- `--nic-id`: ID of the new network interface to associate with
+- `--json`: Format output in JSON
 
 ---
 
@@ -173,7 +176,7 @@ View details of a public gateway
 
 **Syntax**
 
-`ibmcloud is public-gateway GATEWAY_ID [--json | --id]`
+`ibmcloud is public-gateway GATEWAY_ID [--json]`
 
 **Options**
 
@@ -188,7 +191,7 @@ Create a new public gateway in current resource group
 
 **Syntax**
 
-`ibmcloud is public-gateway-create GATEWAY_NAME VPC_ID ZONE [--floating-ip IP_ID]`
+`ibmcloud is public-gateway-create GATEWAY_NAME VPC_ID ZONE [--floating-ip-id IP_ID | --floating-ip-address IP_ADDERSS] [--json]`
 
 **Options**
 
@@ -196,6 +199,7 @@ Create a new public gateway in current resource group
 - `VPC_ID`: ID of the VPC
 - `ZONE`: Name of the zone
 - `--floating-ip`: ID of the floating IP bound to the public gateway
+- `--json`: Format output in JSON
 
 ---
 
@@ -205,12 +209,13 @@ Update a public gateway
 
 **Syntax**
 
-`ibmcloud is public-gateway-update GATEWAY_ID --name NEW_NAME`
+`ibmcloud is public-gateway-update GATEWAY_ID --name NEW_NAME [--json]`
 
 **Options**
 
 - `GATEWAY_ID `: ID of the public gateway
 - `--name`: New name of the public gateway
+- `--json`: Format output in JSON
 
 ---
 
@@ -264,12 +269,13 @@ Create a network ACL in current resource group
 
 **Syntax**
 
-`ibmcloud is network-acl-create ACL_NAME [--source-acl SOURCE_ACL_ID]`
+`ibmcloud is network-acl-create ACL_NAME [--source-acl-id SOURCE_ACL_ID] [--json]`
 
 **Options**
 
 - `ACL_NAME`: Name of the network acl
 - `--source-acl`: the ID the source network ACL to copy from
+- `--json`: Format output in JSON
 
 ---
 
@@ -279,12 +285,13 @@ Update a network ACL
 
 **Syntax**
 
-`ibmcloud is network-acl-update ACL_ID --name NEW_NAME`
+`ibmcloud is network-acl-update ACL_ID --name NEW_NAME [--json]`
 
 **Options**
 
 - `ACL_ID`: ID of the network ACL
 - `--name`: New name of the network ACL
+- `--json`: Format output in JSON
 
 ---
 
@@ -340,7 +347,7 @@ Add a rule to a network ACL
 
 **Syntax**
 
-`ibmcloud is network-acl-rule-add RULE_NAME ACL_ID ACTION DIRECTION SOURCE DEST PROTOCOL [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--before-rule RULE_ID]`
+`ibmcloud is network-acl-rule-add RULE_NAME ACL_ID ACTION DIRECTION PROTOCOL SOURCE DESTINATION  [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--before-rule-id RULE_ID] [--json]`
 
 **Options**
 
@@ -349,13 +356,13 @@ Add a rule to a network ACL
 - `ACTION`: `allow` or `deny`
 - `DIRECTION`: Direction of traffic to enforce. Valid values are `ingress` and `egress`
 - `SOURCE`: source IP address or CIDR block
-- `DEST`: destination IP address or CIDR block
+- `DESTINATION`: destination IP address or CIDR block
 - `PROCOTOL`: Protocol to enforce. Valid values are `all`, `icmp`, `tcp` and `udp`
 - `--icmp-code`: ICMP traffic code to allow. Valid values from 0 to 255. This is specified only when protocol is set to `icmp`
 - `--icmp-type`: ICMP traffic type to allow. Valid values from 0 to 254. This is specified only when protocol is set to `icmp`
 - `--port-max`: Maximum port number. Valid values are from 1 to 65535.This is specified only when protocol is set to `tcp` or `udp`
 - `--port-min`: Minimum port number. Valid values are from 1 to 65535. This is specified only when protocol is set to `tcp` or `udp`
-- `--before-rule`: ID of the rule id that this rule is inserted before.
+- `--before-rule-id`: ID of the rule id that this rule is inserted before.
 
 ---
 
@@ -365,7 +372,7 @@ Update a rule of network ACL
 
 **Syntax**
 
-`ibmcloud is network-acl-rule-update  ACL_ID RULE_ID [--action ACTION] [--direction DIRECTION] [--source SOURCE] [--dest DEST] [--protocol PROTOCOL] [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--before-rule RULE_ID]`
+`ibmcloud is network-acl-rule-update ACL_ID RULE_ID [--action ACTION] [--direction DIRECTION] [--source SOURCE] [--dest DEST] [--protocol PROTOCOL] [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--before-rule-id RULE_ID] [--json]`
 
 **Options**
 
@@ -380,7 +387,7 @@ Update a rule of network ACL
 - `--icmp-type`: ICMP traffic type to allow. Valid values from 0 to 254. This is specified only when protocol is set to `icmp`
 - `--port-max`: Maximum port number. Valid values are from 1 to 65535.This is specified only when protocol is set to `tcp` or `udp`
 - `--port-min`: Minimum port number. Valid values are from 1 to 65535. This is specified only when protocol is set to `tcp` or `udp`
-- `--before-rule`: ID of the rule id that this rule is inserted before.
+- `--before-rule-id`: ID of the rule id that this rule is inserted before.
 
 ---
 
@@ -396,7 +403,7 @@ Delete a rule from network ACL
 
 - `ACL_ID `: ID of the security group
 - `RULE_ID `: ID of the rule
-- `--json`: show output in JSON format
+- `-f, --force`: Force the operation without confirmation
 
 ---
 
@@ -425,7 +432,7 @@ View details of a subnet
 
 **Syntax**
 
-`ibmcloud is subnet SUBNET_ID [--json | --id]`
+`ibmcloud is subnet SUBNET_ID [--json]`
 
 **Options**
 
@@ -440,7 +447,7 @@ Create a subnet in current resource group
 
 **Syntax**
 
-`ibmcloud is subnet-create SUBNET_NAME VPC_ID ZONE (--ipv4_cidr_block CIDR_BLOCK | --ipv4_address_count ADDR_COUNT) [--generation GEN] [--ip-version IP_VERSION] [--network-acl NETWORK_ACL_ID] [--public-gateway PUBLIC_GATEWAY_ID] [--json]`
+`ibmcloud is subnet-create SUBNET_NAME VPC_ID ZONE (--ipv4_cidr_block CIDR_BLOCK | --ipv4_address_count ADDR_COUNT) [--generation GEN] [--network-acl NETWORK_ACL_ID] [--public-gateway PUBLIC_GATEWAY_ID] [--json]`
 
 **Options**
 
@@ -450,7 +457,6 @@ Create a subnet in current resource group
 - `--ipv4_cidr_block`: the IPv4 range of the subnet, this is exclusive with  `--ipv4_address_count`
 - `--ipv4_address_count`: the total number of IPv4 addresses required. This is exclusive with `--ipv4_cidr_block`
 - `--generation`:  generation of the subnet. Valid values are `gt` and `gc`. Defauts to `gt`
-- `--ip-version`: version of the IP address. Valid values are `ipv4`, `ipv6` and 'both'. Default to `ipv4`
 - `--network-acl`: the ID of the network ACL for the subnet
 - `--public-gateway`: the ID of the public-gateway for the subnet
 - `--json`: Format output in JSON
@@ -488,50 +494,18 @@ Delete a subnet
 
 ---
 
-### `ibmcloud is subnet-pubic-gateway-attach`
-
-Attach a pubic gateway to a subnet
-
-**Syntax**
-
-`ibmcloud is subnet-pubic-gateway-attach SUBNET_ID GATEWAY_ID [--json]`
-
-**Options**
-
-- `SUBNET_ID `: ID of the subnet
-- `GATEWAY_ID`: ID of the public public gateway
-- `--json`: Format output in JSON
-
----
-
 ### `ibmcloud is subnet-pubic-gateway-detach`
 
 Detach the public gateway from a subnet
 
 **Syntax**
 
-`ibmcloud is subnet-pubic-gateway-detach SUBNET_ID [--json]`
+`ibmcloud is subnet-pubic-gateway-detach SUBNET_ID [-f, --force]`
 
 **Options**
 
 - `SUBNET_ID `: ID of the subnet
-- `--json`: Format output in JSON
----
-
-### `ibmcloud is subnet-network-acl-attach`
-
-Attach the network acl to a subnet
-
-**Syntax**
-
-`ibmcloud is subnet-network-acl-attach SUBNET_ID ACL_ID [--json]`
-
-**Options**
-
-- `SUBNET_ID `: ID of the subnet
-- `ACL_ID`: ID fo the network ACL
-- `--json`: Format output in JSON
-
+- `-f, --force`: Delete without confirmation
 ---
 
 ### `ibmcloud is subnet-network-acl-detach`
@@ -540,13 +514,12 @@ Detach the network acl from a subnet
 
 **Syntax**
 
-`ibmcloud is subnet-network-acl-detach (SUBNET_NAME | SUBNET_ID) [--json]`
+`ibmcloud is subnet-network-acl-detach SUBNET_ID [-f, --force]`
 
 **Options**
 
-- `SUBNET_NAME`: Name of the subnet
 - `SUBNET_ID `: ID of the subnet
-- `--json`: Format output in JSON
+- `-f, --force`: Delete without confirmation
 ---
 
 ## Security Groups
@@ -557,11 +530,10 @@ List all security groups
 
 **Syntax**
 
-`ibmcloud is security-groups [--vpc VPC_ID] [--json]`
+`ibmcloud is security-groups [--json]`
 
 **Options**
 
-- `--vpc`: Filter with specified VPC_ID.  
 - `--json`: Format output in JSON
 
 ---
@@ -625,6 +597,39 @@ Delete a security group
 
 - `GROUP_ID `: ID of the security group
 - `-f, --force`: Delete without confirmation
+
+---
+
+
+### `ibmcloud is security-group-network-interfaces`
+
+List all network interfaces of a security group
+
+**Syntax**
+
+`ibmcloud is security-group-network-interfaces GROUP_ID [--json]`
+
+**Options**
+
+- `GROUP_ID`: ID of the security group
+- `--json`: show output in JSON format
+
+---
+
+
+### `ibmcloud is security-group-network-interface`
+
+Retrieve the details of a network interface of a security group
+
+**Syntax**
+
+`ibmcloud is security-group-network-interface GROUP_ID NIC_ID [--json]`
+
+**Options**
+
+- `GROUP_ID`: ID of the security group
+- `NIC_ID`: ID of the network interface
+- `--json`: show output in JSON format
 
 ---
 
@@ -697,16 +702,16 @@ Add a rule to a security group. The IP version defaults to IPv4.
 
 **Syntax**
 
-`ibmcloud is security-group-rule-add GROUP_ID DIRECTION PROTOCOL (REMOTE_ADDRESS | REMOTE_CIDR_BLOCK | PEER_SECURITY_GROUP_ID) [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--json]`
+`ibmcloud is security-group-rule-add GROUP_ID DIRECTION IP_VERSION PROTOCOL [--remote REMOTE_ADDRESS | CIDR_BLOCK | SECURITY_GROUP_ID] [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--json]`
 
 **Options**
 
 - `GROUP_ID `: ID of the security group
-- `DIRECTION`: Direction of traffic to enforce. Valid values are `ingress` or `egress`
+- `DIRECTION`: Direction of traffic to enforce. Valid values are `inbound` or `outbound`
 - `PROTOCOL`: Protocol to enforce. Valid values are `all`, `icmp`, `tcp` and `udp`
-- `REMOTE_ADDRESS`: IP address from/to which this rule should allow traffic. This is exclusive with `REMOTE_CIDR_BLOCK` and `PEER_SECURITY_GROUP_ID`
-- `REMOTE_CIDR_BLOCK`: Range of IPv4 addresses in CIDR format from/to which this rule should allow traffic.  This is exclusive with `REMOTE_ADDRESS` and `PEER_SECURITY_GROUP_ID`
-- `PEER_SECURITY_GROUP`: ID of the security group with remote addresses. This is exclusive with `REMOTE_ADDRESS` and `REMOTE_CIDR_BLOCK`
+- `IP_VERSION`: Version of the IP address. Valid values are `ipv4` and `ipv6` 
+- `PROTOCOL`: Protocol to enforce. Valid values are `all`, `icmp`, `tcp` and `udp`
+- `--remote`: the set of network interfaces from which this rule allows traffic, Can be specified as either an REMOTE_ADDRESS, CIDR_BLOCK and SECURITY_GROUP_ID
 - `--icmp-code`: ICMP traffic code to allow. Valid values from 0 to 255. This is specified only when protocol is set to `icmp`
 - `--icmp-type`: ICMP traffic type to allow. Valid values from 0 to 254. This is specified only when protocol is set to `icmp`
 - `--port-max`: Maximum port number. Valid values are from 1 to 65535.This is specified only when protocol is set to `tcp` or `udp`
@@ -720,20 +725,21 @@ Update a rule of a security group. The IP version defaults to IPv4.
 
 **Syntax**
 
-`ibmcloud is security-group-rule-update GROUP_ID RULE_ID [--direction DIRECTION] [--protocol PROTOCOL] [--remote-address REMOTE_ADDRESS  | --remote-cidr-block CIDR_BLOCK ] [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--json]`
+`ibmcloud is security-group-rule-update GROUP_ID RULE_ID GROUP_ID RULE_ID [--direction DIRECTION] [--ip-version IP_VERSION] [--protocol PROTOCOL] [--remote REMOTE_ADDRESS | CIDR_BLOCK | SECURITY_GROUP_ID] [--icmp-code ICMP_CODE] [--icmp-type ICMP_TYPE] [--port-max PORT_MAX] [--port-min PORT_MIN] [--json]`
 
 **Options**
 
-- `GROUP_ID `: ID of the security group
+- `GROUP_NAME`: Name of the security group
+- `GROUP_ID`: ID of the security group
 - `RULE_ID`: ID of the rule
 - `--direction`: Direction of traffic to enforce. Valid values are `ingress` or `egress`
+- `--ip-version`: Version of the IP address. Valid values are `ipv4` and `ipv6` 
 - `--protocol`: Protocol to enforce. Valid values are `all`, `icmp`, `tcp` and `udp`
-- `--remote-address`: IP address from/to which this rule should allow traffic. This is exclusive with `--remote-cidr-block`
-- `--remote-cidr-block`: Range of IPv4 addresses in CIDR format from/to which this rule should allow traffic.  This is exclusive with `--remote-address`
+- `--remote`: the set of network interfaces from which this rule allows traffic, Can be specified as either an REMOTE_ADDRESS, CIDR_BLOCK and SECURITY_GROUP_ID
 - `--icmp-code`: ICMP traffic code to allow. Valid values from 0 to 255. This is specified only when protocol is set to `icmp`
 - `--icmp-type`: ICMP traffic type to allow. Valid values from 0 to 254. This is specified only when protocol is set to `icmp`
 - `--port-max`: Maximum port number. Valid values are from 1 to 65535.This is specified only when protocol is set to `tcp` or `udp`
-- `--port-min`: Minimum port number. Valid values are from 1 to 65535. This is specified only when protocol is set to `tcp` or `udp`
+- `--port-min`: Minimum port nubmer. Valid values are from 1 to 65535. This is specified only when protocol is set to `tcp` or `udp`
 - `--json`: show output in JSON format
 ---
 
@@ -743,13 +749,13 @@ Delete a rule from a security group
 
 **Syntax**
 
-`ibmcloud is security-group-rule-delete GROUP_ID RULE_ID [--json]`
+`ibmcloud is security-group-rule-delete GROUP_ID RULE_ID [-f, --force]`
 
 **Options**
 
 - `GROUP_ID `: ID of the security group
 - `RULE_ID `: ID of the rule
-- `--json`: show output in JSON format
+- `-f, --force`: Delete without confirmation
 
 ---
 
@@ -790,13 +796,13 @@ Create a VPC in current resource group
 
 **Syntax**
 
-ibmcloud is vpc-create VPC_NAME [--default] [--default-network-acl ACL_ID] [--json]`
+`ibmcloud is vpc-create VPC_NAME [--default] [--default-network-acl-id ACL_ID] [--json]`
 
 **Options**
 
 - `VPC_NAME `: Name of the VPC
 - `--default`: set the VPC default of the account
-- `--default-network-acl`: the ID of the default network ACL. This is exclusive with `--default-network-acl-name`
+- `--default-network-acl-id`: the ID of the default network ACL. This is exclusive with `--default-network-acl-name`
 - `--json`: Format output in JSON
 
 ---
@@ -830,20 +836,18 @@ Delete a vpc
 - `-f, --force`: Delete without confirmation
 
 ---
+### `ibmcloud is vpc-default-security-group`
 
-### `ibmcloud is vpc-default-network-acl-set`
-
-Set the default network ACL for a VPC
+Retrieve the details of the default security group of a VPC
 
 **Syntax**
 
-`ibmcloud is vpc-default-network-acl-set VPC_ID NETWORK_ACL_ID [--json]`
+`ibmcloud is vpc-default-security-group VPC_ID [--json]`
 
 **Options**
 
-- `VPC_ID `: ID of the vpc
-- `NETWORK_ACL_ID`: ID of the network ACL
-- `--json`: Format output in JSON
+- `VPC_NAME`: Name of the vpc
+- `--json`: Format the output in JSON
 
 ---
 
@@ -952,12 +956,13 @@ Imports an RSA public key
 
 **Syntax**
 
-`ibmcloud is key-create KEY_NAME  (KEY | @KEY_FILE) `
+`ibmcloud is key-create KEY_NAME (KEY | @KEY_FILE) [--json]`
 
 **Options**
 
 - `KEY_NAME`: Name of the key
 - `KEY`: The public ssh key. If starts with "@", the rest should be a file name.
+- `--json`: Format output in JSON
 
 ---
 
@@ -967,12 +972,13 @@ Update the name of a key
 
 **Syntax**
 
-`ibmcloud is key-update KEY_ID --name NEW_NAME`
+`ibmcloud is key-update KEY_ID --name NEW_NAME [--json]`
 
 **Options**
 
 - `KEY_ID`: ID of the key
 - `--name NEW_NAME`: New name for the key
+- `--json`: Format output in JSON
 
 ---
 
@@ -1031,21 +1037,26 @@ Create a server instance
 
 **Syntax**
 
-`ibmcloud is instance-create INSTANCE_NAME VPC_ID ZONE PROFILE (--image IMAGE_ID | --boot-volume BOOT_VOLUME_ID) [--generation GENERATION] [--volumes IDS] [--keys IDS] [--user-data DATA]`
+`ibmcloud is instance-create INSTANCE_NAME VPC_ID ZONE_NAME PROFILE_NAME SUBNET_ID PORT_SPEED (--image-id IMAGE_ID | --boot-volume-id BOOT_VOLUME_ID) (--key-ids IDS) [--generation GENERATION] [--volume-ids IDS] [--user-data DATA] [--security-group-ids SECURITY_GROUP_IDS] [--json]`
 
 
 **Options**
 
 - `INSTANCE_NAME `: Name of the server instance
 - `VPC_ID`: ID of the VPC.
-- `ZONE`: Name of the zone
-- `PROFILE`: Name of the profile.
-- `--image-id IMAGE_ID`: ID of the image. This is exclusive with `--boot-volume`
-- `--boot-volume VOLUME_ID`: ID of the boot volume. This is exclusive with `--image`
-- `--volumes VOLUME_ID1,VOLUME_ID2...`: IDs of the volumes to attached to the server instance
-- `--keys KEY_ID1,KEY_ID2...`: IDs of the keys
-- `--generation GENERATION`: Generation of the server instance. valid values are `gc`, `gt`. Default to `gt`. (`gc` only for beta)
-- `--user-data DATA`: User data to transfer to the server instance
+- `ZONE_NAME`: Name of the zone
+- `PROFILE_NAME`: Name of the profile.
+- `SUBNET_ID`: The network interface associated subnet ID
+- `PORT_SPEED`: The network interface port speed in Mbps
+- `--image-id IMAGE_ID`: ID of the image. This is exclusive with `--boot-volume-id`
+- `--boot-volume-id VOLUME_ID`: ID of the boot volume. This is exclusive with `--image-id`
+- `--generation GENERATION`: Generation of the server instance. Valid values are `gc`, `gt`. Default to `gt`. (`gc` only for beta)
+- `--volumes-ids VOLUME_ID1,VOLUME_ID2...`: IDs of the volumes to attach to the server
+- `--volumes-names VOLUME_NAME1,VOLUME_2...`: Names of the volumes to attach to the server
+- `--key-ids KEY_ID1,KEY_ID2...`: IDs of the key
+- `--key-names KEY_NAME1,KEY_NAME2...`: Names of the key
+- `--user-data DATA`: User data to transfer to the server
+- `--json`: Format output in JSON
 
 ---
 
@@ -1055,13 +1066,14 @@ Update a server instance
 
 **Syntax**
 
-`ibmcloud is instance-update INSTANCE_ID [--name NEW_NAME] [--profile PROFILE]`
+`ibmcloud is instance-update INSTANCE_ID [--name NEW_NAME] [--profile PROFILE] [--json]`
 
 **Options**
 
 - `INSTANCE_ID `: ID of the server instance
 - `--name NEW_NAME`: New name of the server instance
 - `--profile PROFILE`: Name of the profile
+- `--json`: Format output in JSON
 
 ---
 
@@ -1080,13 +1092,27 @@ Delete a server instance
 
 ---
 
+### `ibmcloud is instance-initialization-values`
+
+View initialization details for an instance
+
+**Syntax**
+
+`ibmcloud is instance-initialization-values INSTANCE_ID [--json]`
+
+**Options**
+
+- `INSTANCE_ID `: ID of the server instance
+- `--json`: Format output in JSON
+
+---
 ### `ibmcloud is instance-start`
 
 Start a server instance
 
 **Syntax**
 
-`ibmcloud is instance-start INSTANCE_ID `
+`ibmcloud is instance-start INSTANCE_ID`
 
 **Options**
 
@@ -1393,5 +1419,772 @@ View details about a zone
 
 - `REGION_NAME`: Name of region
 - `ZONE_NAME`: Name of zone
+- `--json`: Format output in JSON
+
+---
+
+<p style="font-size:24px">VPN</p>
+{: #VPN}
+
+This section gives details about the CLI commands available for working with VPN.
+
+## IKE Policies
+
+### `ibmcloud is ike-policies`
+
+List all IKE policies 
+
+**Syntax**
+
+`ibmcloud is ike-policies [--json]`
+
+**Options**
+
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ike-policy`
+
+View details of an IKE policy
+
+**Syntax**
+
+`ibmcloud is ike-policy IKE_POLICY_ID [--json]`
+
+**Options**
+- `IKE_POLICY_ID`: ID of the IKE policy
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ike-policy-create`
+
+Create an IKE policy in current resource group
+
+**Syntax**
+
+`ibmcloud is ike-policy-create IKE_POLICY_NAME AUTHENTICATION_ALGORITHM DH_GROUP ENCRYPTION_ALGORITHM IKE_VERSION [--key-lifetime KEY_LIFETIME] [--json]`
+
+**Options**
+- `IKE_POLICY_NAME`: Name of the IKE policy
+- `AUTHENTICATION_ALGORITHM`: The authentication algorithm. Enumeration type: md5, sha1, sha256
+- `DH_GROUP`: The Diffie-Hellman group. Enumeration type: 2, 5, 14
+- `ENCRYPTION_ALGORITHM`: The encryption algorithm. Enumeration type: 3des, aes128, aes256
+- `IKE_VERSION`: The IKE protocol version. Enumeration type: 1, 2
+- `--key-lifetime`: The key lifetime in seconds. Maximum: 86400, Minimum: 300
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ike-policy-delete`
+
+Delete an IKE policy
+
+**Syntax**
+
+`ibmcloud is ike-policy-delete IKE_POLICY_ID [-f, --force]`
+
+**Options**
+
+- `IKE_POLICY_ID`: ID of the IKE policy
+- `-f, --force`: Force delete without confirmation.
+
+---
+### `ibmcloud is ike-policy-update`
+
+Update an IKE policy
+
+**Syntax**
+
+`ibmcloud is ike-policy-update IKE_POLICY_ID [--authentication_algorithm md5 | sha1 | sha256] [--dh-group 2 | 5 | 14] [--encryption-algorithm 3des | aes128 | aes256] [--ike-version 1 | 2] [--key-lifetime KEY_LIFETIME] [--name NEW_NAME] [--json]`
+
+**Options**
+- `IKE_POLICY_ID`: Name of the ID policy
+- `--authentication_algorithm`: The authentication algorithm. Enumeration type: md5, sha1, sha256
+- `--dh-group`: The Diffie-Hellman group. Enumeration type: 2, 5, 14
+- `--encryption-algorithm`: The encryption algorithm. Enumeration type: 3des, aes128, aes256
+- `--ike-version`: The IKE protocol version. Enumeration type: 1, 2
+- `--key-lifetime`: The key lifetime in seconds. Maximum: 86400, Minimum: 300
+- `--name`: New name of the IKE policy
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ike-policy-connections`
+
+List all connections that use the IKE policy
+
+**Syntax**
+
+`ibmcloud is ike-policy-connections IKE_POLICY_ID [--json]`
+
+**Options**
+- `IKE_POLICY_ID`: ID of the IKE policy
+- `--json`: Format output in JSON
+
+---
+## IPsec Policies
+
+### `ibmcloud is ipsec-policies`
+
+List all IPsec policies 
+
+**Syntax**
+
+`ibmcloud is ipsec-policies [--json]`
+
+**Options**
+
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ipsec-policy`
+
+View details of an IPsec policy
+
+**Syntax**
+
+`ibmcloud is ipsec-policy IPSEC_POLICY_ID [--json]`
+
+**Options**
+- `IPSEC_POLICY_ID`: ID of the IPsec policy
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ipsec-policy-create`
+
+Create an IPsec policy in current resource group
+
+**Syntax**
+ 
+`ibmcloud is ipsec-policy-create IPSEC_POLICY_NAME AUTHENTICATION_ALGORITHM ENCRYPTION_ALGORITHM PFS [--key-lifetime KEY_LIFETIME] [--json]`
+
+**Options**
+- `IPSEC_POLICY_NAME`: Name of the IPsec policy
+- `AUTHENTICATION_ALGORITHM`: The authentication algorithm. Enumeration type: md5, sha1, sha256
+- `ENCRYPTION_ALGORITHM`: The encryption algorithm. Enumeration type: 3des, aes128, aes256
+- `PFS`: Perfect Forward Secrecy. Enumeration type: disabled, group_2, group_5, group_14
+- `--key-lifetime`: The key lifetime in seconds. Maximum: 86400, Minimum: 300
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ipsec-policy-delete`
+
+Delete an IPsec policy
+
+**Syntax**
+
+`ibmcloud is ipsec-policy-delete IPSEC_POLICY_ID [-f, --force]`
+
+**Options**
+
+- `IPSEC_POLICY_NAME`: Name of the IPsec policy
+- `-f, --force`: Force delete without confirmation.
+
+---
+### `ibmcloud is ipsec-policy-update`
+
+Update an IPsec policy
+
+**Syntax**
+
+`ibmcloud is ipsec-policy-update IPSEC_POLICY_ID [--authentication_algorithm md5 | sha1 | sha256] [--encryption-algorithm 3des | aes128 | aes256] [--key-lifetime KEY_LIFETIME] [--pfs disabled | group_2 | group_5 | group_14] [--name NEW_NAME] [--json]`
+
+**Options**
+- `IPSEC_POLICY_ID`: ID of the IPsec policy
+- `--authentication_algorithm`: The authentication algorithm. Enumeration type: md5, sha1, sha256
+- `--encryption-algorithm`: The encryption algorithm. Enumeration type: 3des, aes128, aes256
+- `--key-lifetime`: The key lifetime in seconds. Maximum: 86400, Minimum: 300
+- `--pfs`: Perfect Forward Secrecy. Enumeration type: disabled, group_2, group_5, group_14
+- `--name`: New name of the IPsec policy
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is ipsec-policy-connections`
+
+List all connections that use the IPsec policy
+
+**Syntax**
+
+`ibmcloud is ipsec-policy-connections IPSEC_POLICY_ID [--json]`
+
+**Options**
+- `IPSEC_POLICY_NAME`: Name of the IPsec policy
+- `--json`: Format output in JSON
+
+---
+
+
+## VPN Gateway
+
+### `ibmcloud is vpn-gateways`
+
+List all vpn gateways 
+
+**Syntax**
+
+`ibmcloud is vpn-gateways [--json]`
+
+**Options**
+
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is vpn-gateway`
+
+View details of an VPN gateway
+
+**Syntax**
+
+`ibmcloud is vpn-gateway VPN_GATEWAY_ID [--json]`
+
+**Options**
+- `VPN_GATEWAY_ID`: ID of the VPN gateway
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is vpn-gateway-create`
+
+Create an VPN gateway in current resource group
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-create VPN_GATEWAY_NAME SUBNET_ID [--json]`
+
+**Options**
+- `VPN_GATEWAY_NAME`: Name of the VPN gateway
+- `SUBNET_ID`: The unique identifier for this subnet
+- `--json`: Format output in JSON
+
+--subnet were mandatory?
+
+---
+### `ibmcloud is vpn-gateway-delete`
+
+Delete an VPN gateway
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-delete VPN_GATEWAY_ID [-f, --force]`
+
+**Options**
+
+- `VPN_GATEWAY_ID`: ID of the VPN gateway
+- `-f, --force`: Force delete without confirmation.
+
+---
+### `ibmcloud is vpn-gateway-update`
+
+Update an VPN gateway
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-update VPN_GATEWAY_ID [--name NEW_NAME] [--json]`
+
+**Options**
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `--name`: New name of the VPN gateway policy
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is vpn-gateway-connections`
+
+List all connections of the VPN gateway
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connections VPN_GATEWAY_ID [--status STATUS] [--json]`
+
+**Options**
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `--status`: Filters the collection to VPN connections with the specified status
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is vpn-gateway-connection-create`
+
+Create a connection of the vpn gateway in current resource group.
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection-create CONNECTION_NAME VPN_GATEWAY_ID PEER_ADDRESS PRESHARED_KEY [--statue-up true | false] [--dead-peer-detection-action ACTION] [--dead-peer-detection-interval INTERVAL] [--dead-peer-detection-timeout TIMEOUT] [--ike-policy IKE_POLICY_ID] [--ipsec-policy IPSEC_POLICY_ID]  [--local-cidrs CIDR1, --local-cidrs CIDR2 ...] [--peer-cidrs CIDR1, --peer-cidrs CIDR2 ...] [--json]`
+
+**Options**
+- `CONNECTION_NAME`: Name of the connection
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `PEER_ADDRESS`: The IP address of the peer VPN gateway
+- `PRESHARED_KEY`: The preshared key
+- `--statue-up`: If set to false, the VPN connection is shut down. default is false
+- `--dead-peer-detection-action`: Dead Peer Detection actions. Enumeration type: restart, clear, hold, none
+- `--dead-peer-detection-interval`: Dead Peer Detection interval in seconds
+- `--dead-peer-detection-timeout`: Dead Peer Detection timeout in seconds
+- `--ike-policy`: ID of the IKE policy
+- `--ipsec-policy`: ID of the IPsec policy
+- `--local-cidrs`: List of CIDRs for this resource
+- `--peer-cidrs`: List of CIDRs for this resource
+- `--json`: Format output in JSON
+  
+---
+### `ibmcloud is vpn-gateway-connection`
+
+Retrieve details of a vpn gateway connection
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection VPN_GATEWAY_ID CONNECTION_ID [--json]`
+
+**Options**
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `CONNECTION_ID`: ID of the connection
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is vpn-gateway-connection-delete`
+
+Delete a vpn gateway connection
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection-delete VPN_GATEWAY_ID CONNECTION_ID [-f, --force]`
+
+**Options**
+
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `CONNECTION_ID`: ID of the connection
+- `-f, --force`: Force delete without confirmation.
+
+---
+### `ibmcloud is vpn-gateway-connection-update`
+
+Update a vpn gateway connection
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection-update VPN_GATEWAY_ID CONNECTION_ID [--statue-up true | false] [--dead-peer-detection-action ACTION] [--dead-peer-detection-interval INTERVAL] [--dead-peer-detection-timeout TIMEOUT] [--ike-policy IKE_POLICY_ID] [--ipsec-policy IPSEC_POLICY_ID] [--peer-address ADDRESS] [--psk PSK] [--name NEW_NAME] [--json]`
+
+**Options**
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `CONNECTION_ID`: ID of the connection
+- `--statue-up`: If set to false, the VPN connection is shut down. default is false
+- `--dead-peer-detection-action`: Dead Peer Detection actions. Enumeration type: restart, clear, hold, none
+- `--dead-peer-detection-interval`: Dead Peer Detection interval in seconds
+- `--dead-peer-detection-timeout`: Dead Peer Detection timeout in seconds
+- `--ike-policy`: ID of the IKE policy
+- `--ipsec-policy`: ID of the IPsec policy
+- `--peer-address`: The IP address of the peer VPN gateway
+- `--psk`: The preshared key
+- `--name`: New name of the connection
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is vpn-gateway-connection-local-cidr-delete`
+
+Remove a local CIDRs from the vpn gateway connection
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection-local-cidr-delete VPN_GATEWAY_ID CONNECTION_ID PREFIX_ADDRESS PREFIX_LENGTH [-f, --force]`
+
+**Options**
+
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `CONNECTION_ID`: ID of the connection
+- `PREFIX_ADDRESS`: The prefix address part of the CIDR
+- `PREFIX_LENGTH`: The prefix length part of the CIDR
+- `-f, --force`: Force delete without confirmation.
+
+---
+### `ibmcloud is vpn-gateway-connection-local-cidr-add`
+
+Add a local CIDRs to a connection
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection-local-cidr-add VPN_GATEWAY_ID CONNECTION_ID PREFIX_ADDRESS PREFIX_LENGTH [--json]`
+
+**Options**
+
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `CONNECTION_ID`: ID of the connection
+- `PREFIX_ADDRESS`: The prefix address part of the CIDR
+- `PREFIX_LENGTH`: The prefix length part of the CIDR
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is vpn-gateway-connection-peer-cidr-delete`
+
+Remove a peer CIDRs from the vpn gateway connection
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection-peer-cidr-delete VPN_GATEWAY_ID CONNECTION_ID PREFIX_ADDRESS PREFIX_LENGTH [-f, --force]`
+
+**Options**
+
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `CONNECTION_ID`: ID of the connection
+- `PREFIX_ADDRESS`: The prefix address part of the CIDR
+- `PREFIX_LENGTH`: The prefix length part of the CIDR
+- `-f, --force`: Force delete without confirmation.
+
+---
+### `ibmcloud is vpn-gateway-connection-peer-cidr-add`
+
+Add a peer CIDRs to a connection
+
+**Syntax**
+
+`ibmcloud is vpn-gateway-connection-peer-cidr-add VPN_GATEWAY_ID CONNECTION_ID PREFIX_ADDRESS PREFIX_LENGTH [--json]`
+
+**Options**
+
+- `VPN_GATEWAY_ID`: ID of the VPN gateway name
+- `CONNECTION_ID`: ID of the connection
+- `PREFIX_ADDRESS`: The prefix address part of the CIDR
+- `PREFIX_LENGTH`: The prefix length part of the CIDR
+- `--json`: Format output in JSON
+---
+
+<p style="font-size:24px">Load Balancers</p>
+{: #Load-Balancers}
+
+This section gives details about the CLI commands available for working with Load Balancers.
+
+## Load Balancer
+
+### `ibmcloud is load-balancers`
+
+List all load balancers
+
+**Syntax**
+
+`ibmcloud is load-balancers [--json]`
+
+**Options**
+
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer`
+
+View details of a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer LOAD_BALANCER_ID [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-create`
+
+Create a load balancer in current resource group.
+
+**Syntax**
+
+`ibmcloud is load-balancer-create LOAD_BALANCER_NAME LOAD_BALANCER_TYPE (--subnets SUBNET_ID1, --subnets SUBNET_ID2 ...) [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_NAME`: Name of the load balancer
+- `LOAD_BALANCER_TYPE`:public or private
+- `--subnets`: The subnets to provision this load balancer
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-delete`
+
+Delete a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-delete LOAD_BALANCER_ID [-f, --force]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `-f, --force`: Delete without confirmation
+
+---
+### `ibmcloud is load-balancer-update`
+
+Update a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-update LOAD_BALANCER_ID [--name NEW_NAME] [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `--name`: New name of the load balancer
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-listeners`
+
+List all the listeners of a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-listeners LOAD_BALANCER_ID [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-listener`
+
+View details of a load balancer listener
+
+**Syntax**
+
+`ibmcloud is load-balancer-listener LOAD_BALANCER_ID LISTENER_ID [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `LISTENER_ID `: ID of the listenser
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-listener-create`
+
+Create a listener for a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-listener-create LOAD_BALANCER_ID PORT PROTOCOL [--certificate-instance CERTIFICATE_INSTANCE_CRN] [--connection-limit LIMIT] [--default-pool DEFAULT_POOL_ID] [--json]`
+
+**Options**
+- `LOAD_BALANCER_NAME`: Name of the load balancer
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `PORT`: The listener port number
+- `PROTOCOL`: The listener protocol. Enumeration type: http, https, tcp
+- `--certificate-instance-crn`: CRN of the certificate instance 
+- `--connection-limit`: The connection limit of the listener
+- `--default-pool`: ID of the default pool
+- `--json`: Format output in JSON
+  
+---
+### `ibmcloud is load-balancer-listener-delete`
+
+Delete a listener from a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-listener-delete LOAD_BALANCER_ID LISTENER_ID [-f, --force]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `LISTENER_ID `: ID of the listenser
+- `-f, --force`: Force delete without confirmation
+  
+---
+### `ibmcloud is load-balancer-listener-update`
+
+Update a listener of a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-listener-update LOAD_BALANCER_ID LISTENER_ID [--certificate-instance CERTIFICATE_INSTANCE_ID] [--connection-limit LIMIT] [--port PORT] [--protocol http | https | tcp] [--default-pool DEFAULT_POOL_ID] [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `LISTENER_ID `: ID of the listenser
+- `--certificate-instance`: ID of the certificate instance 
+- `--connection-limit`: The connection limit of the listener
+- `--port`: The listener port number
+- `--protocol`: The listener protocol. Enumeration type: http, https, tcp
+- `--default-pool`: ID of the default pool
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-pools`
+
+List all pools of a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-pools LOAD_BALANCER_ID [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-pool`
+
+View details of load balancer pool
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool LOAD_BALANCER_ID POOL_ID [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `--json`: Format output in JSON
+  
+---
+### `ibmcloud is load-balancer-pool-create`
+
+Create a pool for a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-create POOL_NAME LOAD_BALANCER_ID ALGORITHM PROTOCOL HEALTH_DELAY HEALTH_RETRIES HEALTH_TIMEOUT HEALTH_TYPE [--health-monitor-url URL][--session-persistence-type TYPE] [--session-persistence-cookie-name NAME] [--json]`
+
+**Options**
+- `POOL_NAME`: Name of the pool
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `ALGORITHM`: The load balancing algorithm. Enumeration type: round_robin, weighted_round_robin, least_connections
+- `PROTOCOL`: The pool protocol. Enumeration type: http, tcp
+- `HEALTH_DELAY`: The health check interval in seconds. Interval must be greater than timeout value
+- `HEALTH_RETRIES`: The health check max retries
+- `HEALTH_TIMEOUT`: The health check timeout in seconds
+- `HEALTH_TYPE`: The pool protocol. Enumeration type: http, tcp
+- `--health-monitor-url`: The health check url. This is applicable only to http type of HEALTH_TYPE
+- `--session-persistence-type`: The session persistence type, Enumeration type: source_ip, http_cookie, app_cookie
+- `--session-persistence-cookie-name`: Session persistence cookie name. This is applicable only to `--session-persistence-type` app_cookie.
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-pool-delete`
+
+Delete a pool from a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-delete LOAD_BALANCER_ID POOL_ID [-f, --force]`
+
+**Options**
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `-f, --force`: Force delete without confirmation
+
+---
+### `ibmcloud is load-balancer-pool-update`
+
+Update a pool of a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-update LOAD_BALANCER_ID POOL_ID [--algorithm round_robin | weighted_round_robin | least_connections] [--health-delay DELAY] [--health-max-retries RETRIES] [--health-timeout TIMEOUT] [--health-type TYPE] [--health-monitor-url URL] [--protocol http | tcp] [--session-persistence-type TYPE] [--session-persistence-cookie-name NAME] [--name NEW_NAME] [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `--algorithm`: The load balancing algorithm. Enumeration type: round_robin, weighted_round_robin, least_connections
+- `--health-delay`: The health check interval in seconds. Interval must be greater than timeout value
+- `--health-max-retries`: The health check max retries
+- `--health-timeout`: The health check timeout in seconds
+- `--health-type`: The pool protocol. Enumeration type: http, tcp
+- `--health-monitor-url`: The health check url. This is applicable only to http type of --health-type
+- `--protocol`: The pool protocol. Enumeration type: http, tcp
+- `--session-persistence-type`: The session persistence type
+- `--session-persistence-cookie-name`: The health check url. This is applicable only to http type of HEALTH_TYPE
+- `--name`: New name of the pool
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-pool-members`
+
+List all the members of a load balancer pool
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-members LOAD_BALANCER_ID POOL_ID [--json]`
+
+**Options**
+
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-pool-member`
+
+View details of pool member 
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-member LOAD_BALANCER_ID POOL_ID MEMBER_ID [--json]`
+
+**Options**
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `MEMBER_ID `: ID of the member
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-pool-member-create`
+
+Create a member of a load balancer pool
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-member-create LOAD_BALANCER_ID POOL_ID PORT TARGET_ADDRESS [--weight WEIGHT] [--json]`
+
+**Options**
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `PORT`: The port number of the application running in the server member
+- `TARGET_ADDRESS`: The IP address of the pool member
+- `--weight`: Weight of the server member. This takes effect only when the load balancing algorithm of its belonging pool is weighted_round_robin
+- `--json`: Format output in JSON
+
+---
+### `ibmcloud is load-balancer-pool-member-update`
+
+Update a member of a load balancer pool
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-member-update LOAD_BALANCER_ID POOL_ID MEMBER_ID [--port PORT] [--target-address TARGET_ADDRESS] [--weight WEIGHT] [--json]`
+
+**Options**
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `MEMBER_ID `: ID of the member
+- `--port`: The port number of the application running in the server member
+- `--target-address`: The IP address of the pool member
+- `--weight`: Weight of the server member. This takes effect only when the load balancing algorithm of its belonging pool is weighted_round_robin
+- `--json`: Format output in JSON
+
+---
+
+### `ibmcloud is load-balancer-pool-member-delete`
+
+Delete a member from a load balancer pool
+
+**Syntax**
+
+`ibmcloud is load-balancer-pool-delete LOAD_BALANCER_ID POOL_ID MEMBER_ID [-f, --force]`
+
+**Options**
+- `LOAD_BALANCER_ID `: ID of the load balancer
+- `POOL_ID `: ID of the pool
+- `MEMBER_ID `: ID of the member
+- `-f, --force`: Force delete without confirmation.
+
+---
+### `ibmcloud is load-balancer-statistics`
+
+List all statistics of a load balancer
+
+**Syntax**
+
+`ibmcloud is load-balancer-statistics LOAD_BALANCER_ID [--json]`
+
+**Options**
+- `LOAD_BALANCER_ID `: ID of the load balancer
 - `--json`: Format output in JSON
 
